@@ -1,4 +1,4 @@
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageFont, ImageDraw
 import glob
 import sys
 import logging
@@ -27,7 +27,7 @@ def GetImageInfos(filename):
     infos['filename'], infos['extension'] = os.path.splitext(filename_w_ext)
     return(infos)
 
-def createPolaroid(filename, border, save=False):
+def createPolaroid(filename, border, save=False, text=False):
     infos = GetImageInfos(filename)
     original_im = Image.open(filename)
 
@@ -44,7 +44,21 @@ def createPolaroid(filename, border, save=False):
 
     # Create polaroid img
     polaroid = ImageOps.expand(square_pic, border=border, fill='white')
+    polaroid_size = polaroid.size
+
+    # Adding text
+    if text:
+        logging.info("Drawing text '{}' to foto".format(text))
+        d = ImageDraw.Draw(polaroid)
+        related_size = int(border / 1.9)
+        font = ImageFont.truetype('Roboto-Black.ttf', size=related_size)
+        w_text, h_text = font.getsize(text)
+        center_h =  ( polaroid_size[1] - ( h_text / 2 )  ) - ( border / 2 )
+        center_w = ( polaroid_size[0] - w_text ) / 2
+        d.text( ( center_w, center_h ), text, fill="black", font=font)
+
     if save:
+      logging.info("Saving photo'{}'".format(infos['filename']))
       polaroid.save('output/polaroid_' + infos['filename'] + infos['extension'])
 
     return(polaroid)
@@ -91,6 +105,7 @@ parser.add_option("-d", "--directory", dest="src_dir", default=False, type="stri
 parser.add_option("-r", "--row", dest="row_num", type="int", default=1, help="Number of element in a row")
 parser.add_option("-D", "--delimiter", dest="delimiter", default=False, action='store_true', help="Show delimiter")
 parser.add_option("-b", "--border-size", dest="border", default=200, help="Border size, default is 200" )
+parser.add_option("-t", "--add-text", dest="add_text", default=False, help="Text to add to bottom to the polaroid")
 (options, args) = parser.parse_args()
 
 if options.src_dir == False:
@@ -102,10 +117,10 @@ strip_num = 1
 for filename in glob.glob(options.src_dir + '/*.jpg'):
     if options.row_num == 1:
         logging.info('Printing single polaroid {}'.format(filename))
-        polaroid = createPolaroid(filename, options.border, save=True)
+        polaroid = createPolaroid(filename, options.border, save=True, text=options.add_text)
     else:
         logging.info('Adding polaroid {} to array'.format(filename))
-        images_array.append(createPolaroid(filename, options.border, save=True))
+        images_array.append(createPolaroid(filename, options.border, save=True, text=options.add_text))
 
     if len(images_array) == options.row_num:
         strip_name = 'strip_' + str(strip_num) + '.jpg'
