@@ -51,7 +51,7 @@ def createPolaroid(filename, border, save=False, text=False):
         logging.info("Drawing text '{}' to foto".format(text))
         d = ImageDraw.Draw(polaroid)
         related_size = int(border / 1.9)
-        font = ImageFont.truetype('Roboto-Black.ttf', size=related_size)
+        font = ImageFont.truetype('fonts/Laila-Medium.ttf', size=related_size)
         w_text, h_text = font.getsize(text)
         center_h =  ( polaroid_size[1] - ( h_text / 2 )  ) - ( border / 2 )
         center_w = ( polaroid_size[0] - w_text ) / 2
@@ -81,19 +81,17 @@ def createStrip(images_array, strip_name, delimiter=False):
     logging.info('Biggest size is ' + str(biggest_img))
 
     if delimiter:
-        line = 1
+        line = 5
+        logging.info("Show Delimiter")
     else:
         line = 0
-    strip_size = ( (biggest_img * num_elements + line), ( biggest_img + line ) )
-    strip = Image.new("RGB", strip_size)
+    strip_size = ( ((biggest_img * num_elements) + (line * 3)), ( biggest_img + line ) )
+    strip = Image.new("RGB", strip_size, color=("Black"))
     goforward = 0
     for image in images_array:
         image_resized = resize_image(image, biggest_img, biggest_img)
-        if goforward == 0:
-            strip.paste(image_resized, (goforward, line))
-        else:
-            strip.paste(image_resized, (goforward + line, line))
-        goforward = goforward + image_resized.size[0]
+        strip.paste(image_resized, (goforward + line, line))
+        goforward = goforward + image_resized.size[0] + line
 
     logging.info('saving strip {}'.format(strip_name))
     strip.save('output/' + strip_name)
