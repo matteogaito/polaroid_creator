@@ -3,6 +3,7 @@ import glob
 import sys
 import logging
 import os
+from pathlib import Path
 from optparse import OptionParser
 
 def GetImageInfos(filename):
@@ -79,6 +80,8 @@ def createStrip(images_array, strip_name, delimiter=False):
 strip_num = 1
 squares = []
 
+img_exts = [ 'JPG', 'jpg' ]
+
 logging.basicConfig(level=logging.INFO)
 
 parser = OptionParser()
@@ -95,9 +98,11 @@ if options.src_dir == False:
 logging.info("Source Directory: {}, Element in row: {}, Delimiter: {}, Text: {}".format(options.src_dir, options.row_num, options.delimiter, options.add_text))
 
 # Get all images
-for filename in glob.glob(options.src_dir + '/*.jpg'):
-    print(filename)
-    squares.append(createSquare(filename))
+for filename in glob.glob(options.src_dir + '/*.*'):
+    photo_path = Path(filename)
+    file_ext = ((photo_path.suffix).upper()).replace(".","")
+    if file_ext in img_exts:
+        squares.append(createSquare(filename))
 
 # Define biggest images square size
 img_size_array = []
