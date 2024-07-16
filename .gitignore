@@ -129,5 +129,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# font
+fonts/*.ttf
+
 # exclude stripes
 output/strip_*.jpg
+squares/*.JPG
